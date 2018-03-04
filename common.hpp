@@ -14,11 +14,6 @@ public:
         this->y = y;
     }
 
-    Move() {
-        this->x = 0;
-        this->y = 0;
-    }
-
     ~Move() {}
 
     int getX() { return x; }
