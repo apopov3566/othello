@@ -49,8 +49,9 @@ int Player::getScore(Move *move){
     //score += this->checkStables(testBoard);
     score += 2*this->checkStables(testBoard);
     score += 3*this->checkCorners(testBoard);
+    score += 2*this->checkMobility(testBoard);
 
-
+    std::cerr << score << std::endl;
     return score;
 
 }
@@ -215,7 +216,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      board->doMove(opponentsMove, opponentSide);
 
      Move *best = nullptr;
-     int bestScore = -64;
+     int bestScore = -9999999;
      for (int i = 0; i < 8; i++) {
          for (int j = 0; j < 8; j++) {
              Move *move = new Move(i, j);
