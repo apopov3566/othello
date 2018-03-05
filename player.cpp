@@ -172,6 +172,27 @@ bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool check
     return stable[x][y];
 }
 
+int Player::checkMobility(Board *board)
+{
+  int diff = 0;
+  for (int i = 0; i < 8; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      Move *move = new Move(i, j);
+      if (board->checkMove(move, playerSide))
+      {
+        diff++;
+      }
+      if (board->checkMove(move, opponentSide))
+      {
+        diff--;
+      }
+    }
+  }
+  return diff;
+}
+
 /*
  * Compute the next move given the opponent's last move. Your AI is
  * expected to keep track of the board on its own. If this is the first move,
