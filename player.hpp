@@ -19,6 +19,7 @@ public:
     int checkStables(Board *board);
     bool stableCell(int x, int y, Board *board, bool stable[][8], bool checked[][8]);
     int checkMobility(Board *board);
+    Move *minimax(Board *board1);
 
     // Flag to tell if the player is running within the test_minimax context
     bool testingMinimax;

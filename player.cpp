@@ -213,6 +213,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      */
      board->doMove(opponentsMove, opponentSide);
 
+     /*
      Move *best = nullptr;
      int bestScore = -1e6;
      for (int i = 0; i < 8; i++) {
@@ -234,5 +235,55 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      }
      board->doMove(best, playerSide);
      return best;
+     */
+     Move* move = minimax(board);
+     board->doMove(move, playerSide);
+     return move;
 
+}
+
+Move *Player::minimax(Board *board1)
+{
+  Move *bestMove = nullptr;
+  int bestMin = -1e6;
+  for (int i = 0; i < 64; i++)
+  {
+    Move *move = new Move(i/8, i%8);
+    if (board1->checkMove(move, playerSide))
+    {
+      //std::cerr << "main move: " << i/8 << " " << i%8 << std::endl;
+      Board *testBoard = board1->copy();
+      testBoard->doMove(move, playerSide);
+      int min = 1e6;
+      for (int a = 0; a < 64; a++)
+      {
+        Move *move2 = new Move(a/8, a%8);
+        if (testBoard->checkMove(move2, opponentSide))
+        {
+          //std::cerr << "move: " << a/8 << " " << a%8 << std::endl;
+          Board *testBoard2 = testBoard->copy();
+          testBoard2->doMove(move2, opponentSide);
+          int score = this->getScore(testBoard2);
+          if (score < min)
+          {
+            min = score;
+          }
+          //std::cerr << "score: " << score << std::endl;
+          //std::cerr << "min: " << min << std::endl;
+        }
+        delete move2;
+      }
+      if (min > bestMin)
+      {
+        bestMin = min;
+        bestMove = move;
+        //std::cerr << "best min: " << bestMin << std::endl;
+      }
+      else
+      {
+        delete move;
+      }
+    }
+  }
+  return bestMove;
 }
