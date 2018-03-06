@@ -214,7 +214,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      board->doMove(opponentsMove, opponentSide);
 
      Move *best = nullptr;
-     int bestScore = -9999999;
+     int bestScore = -1e6;
      for (int i = 0; i < 8; i++) {
          for (int j = 0; j < 8; j++) {
              Move *move = new Move(i, j);
