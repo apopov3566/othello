@@ -4,7 +4,7 @@
 #include <iostream>
 #include "common.hpp"
 #include "board.hpp"
-#include <vector>
+#include <array>
 using namespace std;
 
 class Player {
@@ -17,9 +17,11 @@ public:
     int getScore(Board *testBoard);
     int checkCorners(Board *board);
     int checkStables(Board *board);
-    bool stableCell(int x, int y, Board *board, bool stable[][8], bool checked[][8]);
+    int checkStableSide(Board *board, Side side);
+    bool stableCell(int x, int y, Board *board, bool stable[][8], bool checked[][8], Side side);
     int checkMobility(Board *board);
     Move *minimax(Board *board1);
+    int getPosition(Board *testBoard);
 
     // Flag to tell if the player is running within the test_minimax context
     bool testingMinimax;

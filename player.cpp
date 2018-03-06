@@ -34,25 +34,51 @@ Player::~Player() {
 int Player::getScore(Board *testBoard){
     int score = 0;
 
-    int playerCount = testBoard->count(playerSide);
-    int opponentCount = testBoard->count(opponentSide);
+    int pc = testBoard->count(playerSide);
+    int oc = testBoard->count(opponentSide);
 
     //if(playerCount + opponentCount > 30){
-    score += (playerCount - opponentCount);
+
     //}
     //else{
     //    score -= opponentCount;
     //}
 
     //score += this->checkStables(testBoard);
-    if (!testingMinimax){
-        score += 2*this->checkStables(testBoard);
-        score += 3*this->checkCorners(testBoard);
-        score += 2*this->checkMobility(testBoard);
+    score += 2*(pc - oc);
+    if(!testingMinimax && (pc + oc) < 62){
+        score += this->getPosition(testBoard);
+        score += 10*this->checkStables(testBoard);
+        score += 80*this->checkCorners(testBoard);
+        score += 20*this->checkMobility(testBoard);
 
     }
     return score;
 
+}
+
+int Player::getPosition(Board *testBoard){
+    int score = 0;
+
+    array<int, 64> V = {20, -3, 11, 8, 8, 11, -3, 20,
+                        -3, -7, -4, 1, 1, -4, -7, -3,
+                        11, -4, 2, 2, 2, 2, -4, 11,
+                        8, 1, 2, -3, -3, 2, 1, 8,
+                        8, 1, 2, -3, -3, 2, 1, 8,
+                        11, -4, 2, 2, 2, 2, -4, 11,
+                        -3, -7, -4, 1, 1, -4, -7, -3,
+                        20, -3, 11, 8, 8, 11, -3, 20};
+
+    for(int i = 0; i < 64; i++){
+        if(board->get(playerSide,(i/8),i%8)){
+            score += V[i];
+        }
+        else if(board->get(opponentSide,(i/8),i%8)){
+            score -= V[i];
+        }
+    }
+
+    return score;
 }
 
 int Player::checkCorners(Board *board){
@@ -70,11 +96,27 @@ int Player::checkCorners(Board *board){
     if(board->get(playerSide,7,7)){
         score += 1;
     }
+    if(board->get(opponentSide,0,0)){
+        score -= 1;
+    }
+    if(board->get(opponentSide,0,7)){
+        score -= 1;
+    }
+    if(board->get(opponentSide,7,0)){
+        score -= 1;
+    }
+    if(board->get(opponentSide,7,7)){
+        score -= 1;
+    }
 
-    return score;
+    return 25*score;
 }
 
 int Player::checkStables(Board *board){
+    return (this->checkStableSide(board, playerSide) - this->checkStableSide(board, playerSide))*100/64;
+}
+
+int Player::checkStableSide(Board *board, Side side){
     int count = 0;
     bool stable[8][8];
     bool checked[8][8];
@@ -85,7 +127,7 @@ int Player::checkStables(Board *board){
     }
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
-            if(this->stableCell(i, j, board, stable, checked)){
+            if(this->stableCell(i, j, board, stable, checked, side)){
                 count++;
             }
         }
@@ -93,12 +135,12 @@ int Player::checkStables(Board *board){
     return count;
 }
 
-bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool checked[][8]){
+bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool checked[][8], Side side){
     if(checked[x][y]){
         return stable[x][y];
     }
     checked[x][y] = true;
-    if(!board->get(playerSide,x,y)){
+    if(!board->get(side,x,y)){
         checked[x][y] = true;
         stable[x][y] = false;
         return false;
@@ -108,20 +150,20 @@ bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool check
     bool lStable = true;
     bool rStable = true;
     for(int i = x+1; i < 8; i++){
-        if(!stableCell(i, y, board, stable, checked)) rStable = false;
+        if(!stableCell(i, y, board, stable, checked, side)) rStable = false;
     }
     for(int i = x-1; i >= 0; i--){
-        if(!stableCell(i, y, board, stable, checked)) lStable = false;
+        if(!stableCell(i, y, board, stable, checked, side)) lStable = false;
     }
 
     //check column stability
     bool uStable = true;
     bool dStable = true;
     for(int i = y+1; i < 8; i++){
-        if(!stableCell(x, i, board, stable, checked)) uStable = false;
+        if(!stableCell(x, i, board, stable, checked, side)) uStable = false;
     }
     for(int i = y-1; i >= 0; i--){
-        if(!stableCell(x, i, board, stable, checked)) dStable = false;
+        if(!stableCell(x, i, board, stable, checked, side)) dStable = false;
     }
 
     //check right-up/left-down diagonal stability
@@ -131,7 +173,7 @@ bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool check
     int tx = x+1;
     int ty = y+1;
     while(tx < 8 && ty < 8){
-        if(!stableCell(tx, ty, board, stable, checked)) urStable = false;
+        if(!stableCell(tx, ty, board, stable, checked, side)) urStable = false;
         tx++;
         ty++;
     }
@@ -139,7 +181,7 @@ bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool check
     tx = x-1;
     ty = y-1;
     while(tx > 0 && ty > 0){
-        if(!stableCell(tx, ty, board, stable, checked)) dlStable = false;
+        if(!stableCell(tx, ty, board, stable, checked, side)) dlStable = false;
         tx--;
         ty--;
     }
@@ -151,7 +193,7 @@ bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool check
     tx = x+1;
     ty = y-1;
     while(tx < 8 && ty > 0){
-        if(!stableCell(tx, ty, board, stable, checked)) drStable = false;
+        if(!stableCell(tx, ty, board, stable, checked, side)) drStable = false;
         tx++;
         ty--;
     }
@@ -159,7 +201,7 @@ bool Player::stableCell(int x, int y, Board *board, bool stable[][8], bool check
     tx = x-1;
     ty = y+1;
     while(tx > 0 && ty < 8){
-        if(!stableCell(tx, ty, board, stable, checked)) ulStable = false;
+        if(!stableCell(tx, ty, board, stable, checked, side)) ulStable = false;
         tx--;
         ty++;
     }
