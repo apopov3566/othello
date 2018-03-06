@@ -13,7 +13,7 @@ public:
     ~Player();
 
     Move *doMove(Move *opponentsMove, int msLeft);
-    int getScore(Board *testBoard, Move *move);
+    int getScore(Board *testBoard);
     int checkCorners(Board *board);
     int checkStables(Board *board);
     bool stableCell(int x, int y, Board *board, bool stable[][8], bool checked[][8]);
