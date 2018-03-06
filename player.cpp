@@ -31,9 +31,8 @@ Player::~Player() {
     delete board;
 }
 
-int Player::getScore(Move *move){
+int Player::getScore(Board *testBoard, Move *move){
     int score = 0;
-    Board* testBoard = board->copy();
     testBoard->doMove(move, playerSide);
 
     int playerCount = testBoard->count(playerSide);
@@ -221,7 +220,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
          for (int j = 0; j < 8; j++) {
              Move *move = new Move(i, j);
              if (board->checkMove(move, playerSide)){
-                 int score = this->getScore(move);
+                 int score = this->getScore(board->copy(), move);
                  if(score > bestScore){
                      bestScore = score;
                      best = move;
