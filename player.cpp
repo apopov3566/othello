@@ -45,11 +45,12 @@ int Player::getScore(Board *testBoard){
     //}
 
     //score += this->checkStables(testBoard);
-    score += 2*this->checkStables(testBoard);
-    score += 3*this->checkCorners(testBoard);
-    score += 2*this->checkMobility(testBoard);
+    if (!testingMinimax){
+        score += 2*this->checkStables(testBoard);
+        score += 3*this->checkCorners(testBoard);
+        score += 2*this->checkMobility(testBoard);
 
-    std::cerr << score << std::endl;
+    }
     return score;
 
 }
@@ -210,7 +211,6 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * TODO: Implement how moves your AI should play here. You should first
      * process the opponent's opponents move before calculating your own move
      */
-
      board->doMove(opponentsMove, opponentSide);
 
      Move *best = nullptr;
