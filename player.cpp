@@ -37,6 +37,15 @@ int Player::getScore(Board *testBoard){
     int pc = testBoard->count(playerSide);
     int oc = testBoard->count(opponentSide);
 
+    if(!testBoard->hasMoves(playerSide) && !testBoard->hasMoves(opponentSide)){
+        if(pc > oc){
+            return 1e6;
+        }
+        else{
+            return -1e6;
+        }
+    }
+
     //if(playerCount + opponentCount > 30){
 
     //}
@@ -46,7 +55,7 @@ int Player::getScore(Board *testBoard){
 
     //score += this->checkStables(testBoard);
     score += 2*(pc - oc);
-    if(!testingMinimax && (pc + oc) < 62){
+    if(!testingMinimax){
         score += this->getPosition(testBoard);
         score += 10*this->checkStables(testBoard);
         score += 80*this->checkCorners(testBoard);
@@ -278,54 +287,99 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      board->doMove(best, playerSide);
      return best;
      */
-     Move* move = minimax(board);
+     Move* move = minimax(board, 2);
      board->doMove(move, playerSide);
      return move;
 
 }
 
-Move *Player::minimax(Board *board1)
-{
-  Move *bestMove = nullptr;
-  int bestMin = -1e6;
-  for (int i = 0; i < 64; i++)
-  {
-    Move *move = new Move(i/8, i%8);
-    if (board1->checkMove(move, playerSide))
-    {
-      //std::cerr << "main move: " << i/8 << " " << i%8 << std::endl;
-      Board *testBoard = board1->copy();
-      testBoard->doMove(move, playerSide);
-      int min = 1e6;
-      for (int a = 0; a < 64; a++)
-      {
-        Move *move2 = new Move(a/8, a%8);
-        if (testBoard->checkMove(move2, opponentSide))
-        {
-          //std::cerr << "move: " << a/8 << " " << a%8 << std::endl;
-          Board *testBoard2 = testBoard->copy();
-          testBoard2->doMove(move2, opponentSide);
-          int score = this->getScore(testBoard2);
-          if (score < min)
-          {
-            min = score;
-          }
-          //std::cerr << "score: " << score << std::endl;
-          //std::cerr << "min: " << min << std::endl;
-        }
-        delete move2;
-      }
-      if (min > bestMin)
-      {
-        bestMin = min;
-        bestMove = move;
-        //std::cerr << "best min: " << bestMin << std::endl;
-      }
-      else
-      {
-        delete move;
-      }
+int Player::minimaxScore(Board *b, int depth){
+    if(depth == 0){
+        return this->getScore(b);
     }
+
+    int bestMinScore = -1e5;
+    for(int i = 0; i < 64; i++){
+        Move *mp = new Move(i/8, i%8);
+        if(b->checkMove(mp, playerSide)){
+            Board* tbp = b->copy();
+            tbp->doMove(mp, playerSide);
+
+            int minScore = 1e5;
+            for(int j = 0; j < 64; j++){
+
+                Move *mo = new Move(j/8, j%8);
+                if(tbp->checkMove(mo, opponentSide)){
+                    Board* tbo = tbp->copy();
+                    tbo->doMove(mo, opponentSide);
+                    int score = this->minimaxScore(tbo, depth - 1);
+                    if(score < minScore){
+                        minScore = score;
+                    }
+                    delete tbo;
+                }
+                delete mo;
+            }
+            if(minScore == 1e5){
+                minScore = this->getScore(tbp);
+            }
+
+            if(minScore > bestMinScore){
+                bestMinScore = minScore;
+            }
+            delete tbp;
+        }
+        delete mp;
+    }
+    if(bestMinScore != -1e5){
+        return bestMinScore;
+    }
+    return this->getScore(b);
+}
+
+Move *Player::minimax(Board *b, int depth)
+{
+  //std::cerr << this->minimaxScore(b, depth) << std::endl;
+
+  int bestMinScore = -1e5;
+  Move *bestMove = nullptr;
+  for(int i = 0; i < 64; i++){
+      Move *mp = new Move(i/8, i%8);
+      if(b->checkMove(mp, playerSide)){
+          Board* tbp = b->copy();
+          tbp->doMove(mp, playerSide);
+
+
+          int minScore = 1e5;
+          for(int j = 0; j < 64; j++){
+
+              Move *mo = new Move(j/8, j%8);
+              if(tbp->checkMove(mo, opponentSide)){
+                  Board* tbo = tbp->copy();
+                  tbo->doMove(mo, opponentSide);
+                  int score = this->minimaxScore(tbo, depth - 1);
+                  if(score < minScore){
+                      minScore = score;
+                  }
+                  delete tbo;
+              }
+              delete mo;
+          }
+
+          if(minScore == 1e5){
+              minScore = this->getScore(tbp);
+          }
+
+          if(minScore >= bestMinScore){
+              delete bestMove;
+              bestMinScore = minScore;
+              bestMove = mp;
+          }
+          delete tbp;
+      }
+      if(mp != bestMove){
+          delete mp;
+      }
   }
   return bestMove;
 }
