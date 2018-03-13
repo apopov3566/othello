@@ -121,7 +121,7 @@ int Player::checkCorners(Board *board){
 }
 
 int Player::checkStables(Board *board){
-    return (this->checkStableSide(board, playerSide) - this->checkStableSide(board, playerSide))*100/64;
+    return (this->checkStableSide(board, playerSide) - this->checkStableSide(board, opponentSide))*100/64;
 }
 
 int Player::checkStableSide(Board *board, Side side){
@@ -287,7 +287,21 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      board->doMove(best, playerSide);
      return best;
      */
-     Move* move = minimax(board, 2);
+     Move* move = nullptr;
+     if(this->board->count(playerSide)+this->board->count(opponentSide) >= 50 && msLeft > 100000){
+         std::cerr << "!!!SUPER EXTRA DEPTH!!!" << std::endl;
+         move = minimax(board, 4);
+     }
+     else if((this->checkStables(this->board) < 0 || this->getScore(this->board) < 0)
+        && msLeft > 4700*(64-this->board->count(playerSide)-this->board->count(opponentSide))
+        && msLeft > 30000){
+         std::cerr << "!!!EXTRA DEPTH!!!" << std::endl;
+         move = minimax(board, 3);
+     }
+     else{
+         move = minimax(board, 2);
+     }
+
      board->doMove(move, playerSide);
      return move;
 
