@@ -258,35 +258,8 @@ int Player::checkMobility(Board *board)
  * return nullptr.
  */
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
-    /*
-     * TODO: Implement how moves your AI should play here. You should first
-     * process the opponent's opponents move before calculating your own move
-     */
      board->doMove(opponentsMove, opponentSide);
 
-     /*
-     Move *best = nullptr;
-     int bestScore = -1e6;
-     for (int i = 0; i < 8; i++) {
-         for (int j = 0; j < 8; j++) {
-             Move *move = new Move(i, j);
-             if (board->checkMove(move, playerSide)){
-                 Board* testBoard = board->copy();
-                 testBoard->doMove(move, playerSide);
-                 int score = this->getScore(testBoard);
-                 if(score > bestScore){
-                     bestScore = score;
-                     best = move;
-                 }
-                 else{
-                     delete move;
-                 }
-             }
-         }
-     }
-     board->doMove(best, playerSide);
-     return best;
-     */
      Move* move = nullptr;
      if(this->board->count(playerSide)+this->board->count(opponentSide) >= 50 && msLeft > 100000){
          std::cerr << "!!!SUPER EXTRA DEPTH!!!" << std::endl;
