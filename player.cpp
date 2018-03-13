@@ -86,7 +86,6 @@ int Player::getPosition(Board *testBoard){
             score -= V[i];
         }
     }
-
     return score;
 }
 
@@ -239,6 +238,7 @@ int Player::checkMobility(Board *board)
       {
         diff--;
       }
+      delete move;
     }
   }
   return diff;
